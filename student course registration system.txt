@@ -1,0 +1,178 @@
+import java.util.*;
+
+class Course {
+    private String code;
+    private String title;
+    private String description;
+    private int capacity;
+    private String schedule;
+    private Set<String> enrolledStudents;
+
+    public Course(String code, String title, String description, int capacity, String schedule) {
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.capacity = capacity;
+        this.schedule = schedule;
+        this.enrolledStudents = new HashSet<>();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public Set<String> getEnrolledStudents() {
+        return enrolledStudents;
+    }
+
+    public boolean enrollStudent(String studentId) {
+        if (enrolledStudents.size() < capacity) {
+            enrolledStudents.add(studentId);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeStudent(String studentId) {
+        return enrolledStudents.remove(studentId);
+    }
+
+    @Override
+    public String toString() {
+        return "Course Code: " + code + "\nTitle: " + title + "\nDescription: " + description
+                + "\nCapacity: " + capacity + "\nSchedule: " + schedule + "\nEnrolled Students: " + enrolledStudents.size();
+    }
+}
+
+class Student {
+    private String id;
+    private String name;
+    private Set<String> registeredCourses;
+
+    public Student(String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.registeredCourses = new HashSet<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Set<String> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    public void registerCourse(String courseCode) {
+        registeredCourses.add(courseCode);
+    }
+
+    public void dropCourse(String courseCode) {
+        registeredCourses.remove(courseCode);
+    }
+
+    @Override
+    public String toString() {
+        return "Student ID: " + id + "\nName: " + name + "\nRegistered Courses: " + registeredCourses;
+    }
+}
+
+public class CourseRegistrationSystem {
+    private Map<String, Course> courses;
+    private Map<String, Student> students;
+    private Scanner scanner;
+
+    public CourseRegistrationSystem() {
+        courses = new HashMap<>();
+        students = new HashMap<>();
+        scanner = new Scanner(System.in);
+    }
+
+    public void addCourse(Course course) {
+        courses.put(course.getCode(), course);
+    }
+
+    public void addStudent(Student student) {
+        students.put(student.getId(), student);
+    }
+
+    public void listAvailableCourses() {
+        System.out.println("Available Courses:");
+        for (Course course : courses.values()) {
+            System.out.println(course);
+        }
+    }
+
+    public void registerStudentForCourse(String studentId, String courseCode) {
+        Student student = students.get(studentId);
+        Course course = courses.get(courseCode);
+        if (student != null && course != null && course.enrollStudent(studentId)) {
+            student.registerCourse(courseCode);
+            System.out.println("Student " + student.getName() + " registered for course " + course.getTitle());
+        } else {
+            System.out.println("Registration failed. Please check student ID or course availability.");
+        }
+    }
+
+    public void removeCourseFromStudent(String studentId, String courseCode) {
+        Student student = students.get(studentId);
+        Course course = courses.get(courseCode);
+        if (student != null && course != null && student.getRegisteredCourses().contains(courseCode)) {
+            course.removeStudent(studentId);
+            student.dropCourse(courseCode);
+            System.out.println("Course " + course.getTitle() + " removed from student " + student.getName());
+        } else {
+            System.out.println("Course removal failed. Please check student ID or course registration.");
+        }
+    }
+
+    public static void main(String[] args) {
+        CourseRegistrationSystem system = new CourseRegistrationSystem();
+
+        // Adding courses
+        Course c1 = new Course("CSCI101", "Introduction to Computer Science", "Basics of programming", 30, "MWF 9:00-10:00");
+        Course c2 = new Course("MATH201", "Calculus I", "Limits, derivatives, and integrals", 25, "TTH 11:00-12:30");
+        system.addCourse(c1);
+        system.addCourse(c2);
+
+        // Adding students
+        Student s1 = new Student("1001", "John Doe");
+        Student s2 = new Student("1002", "Alice Smith");
+        system.addStudent(s1);
+        system.addStudent(s2);
+
+        // Registering students for courses
+        system.registerStudentForCourse("1001", "CSCI101");
+        system.registerStudentForCourse("1001", "MATH201");
+        system.registerStudentForCourse("1002", "CSCI101");
+
+        // Displaying available courses
+        system.listAvailableCourses();
+
+        // Removing course from student
+        system.removeCourseFromStudent("1001", "CSCI101");
+
+        // Displaying updated student information
+        System.out.println(system.students.get("1001"));
+    }
+}
